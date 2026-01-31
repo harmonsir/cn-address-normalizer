@@ -5,6 +5,7 @@ China address standardizer with a prebuilt index file.
 ## Install （use whl install first）
 
 ```bash
+pip install https://github.com/harmonsir/cn-address-normalizer/releases/download/latest/cn_address_normalizer-0.0.1-py3-none-any.whl
 ```
 
 ## Usage
@@ -56,7 +57,7 @@ print(normalizer.normalize("北京"))
 - `administrative_divisions_v2.json`
 - `iso3166-1.json`
 - `iso3166-3.json`
-- `worldcities.csv`
+- [`worldcities.csv`](https://simplemaps.com/data/world-cities)
 
 The script uses `pypinyin` to generate pinyin variants and then saves the index file. Adjust the paths as needed.
 
@@ -79,7 +80,7 @@ python build_dataset.py
 ## 安装（先使用whl安装）
 
 ```bash
-
+pip install https://github.com/harmonsir/cn-address-normalizer/releases/download/latest/cn_address_normalizer-0.0.1-py3-none-any.whl
 ```
 
 ## 用法
