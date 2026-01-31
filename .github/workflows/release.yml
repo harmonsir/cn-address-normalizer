@@ -32,7 +32,7 @@ jobs:
       - name: Build wheel
         run: python setup.py bdist_wheel
 
-      - name: Publish release assets
+      - name: Publish release assets (tag)
         uses: ncipollo/release-action@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
@@ -41,9 +41,15 @@ jobs:
           replacesArtifacts: true
           tag: ${{ github.ref_name }}
 
-      - name: Upload wheel artifact
-        uses: actions/upload-artifact@v4
+      - name: Publish release assets (main)
+        uses: ncipollo/release-action@v1
         if: startsWith(github.ref, 'refs/heads/main')
         with:
-          name: wheel
-          path: dist/*.whl
+          artifacts: "dist/*.whl"
+          allowUpdates: true
+          replacesArtifacts: true
+          tag: latest
+          name: latest
+          makeLatest: true
+          generateReleaseNotes: false
+          prerelease: true
