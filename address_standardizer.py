@@ -3,6 +3,7 @@ import pickle
 import struct
 import zlib
 from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 import ahocorasick
@@ -159,7 +160,13 @@ class AddressNormalizer:
         IndexPersistence.save(filepath, state)
 
     def load(self, filepath: str):
-        state = IndexPersistence.load(filepath)
+        path = Path(filepath)
+        if not path.is_absolute() and not path.exists():
+            module_path = Path(__file__).resolve().with_name(path.name)
+            if module_path.exists():
+                path = module_path
+
+        state = IndexPersistence.load(str(path))
 
         # 2. 对 entries 进行“复写”：字典 -> 对象
         raw_entries = state["entries"]
@@ -178,4 +185,4 @@ if __name__ == '__main__':
     new_normalizer.load("address_standardizer.bin")
 
     # 测试加载后的结果
-    print(f"加载后的输出: {new_normalizer.normalize("taiwan")}")
+    print(f"加载后的输出: {new_normalizer.normalize('taiwan')}")
