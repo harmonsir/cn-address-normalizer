@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "address-standardizer"
+version = "1.0.0"
+description = "A professional, multi-region address standardizer with prebuilt indices."
+readme = "README.md"
+authors = [{ name = "Harmon" }]
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "pyahocorasick",
+    "python-Levenshtein",
+]
+requires-python = ">=3.8"
+
+[project.urls]
+Homepage = "https://github.com/harmonsir/cn-address-normalizer"
+
+[tool.setuptools]
+packages = ["address_standardizer"]
+
+[tool.setuptools.package-data]
+address_standardizer = ["*.bin", "data/**/*.bin"]

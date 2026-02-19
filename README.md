@@ -1,147 +1,99 @@
-# cn-address-normalizer
+# Address Standardizer (v1.0.0)
 
-China address standardizer with a prebuilt index file.
+Professional, high-performance address search and standardization library for Chinese administrative divisions.
 
-## Install （use whl install first）
+## New in v1.0.0
+
+- **Advanced Search Logic**: Support for Pinyin Combo (e.g., `gdfs` -> Guangdong Foshan), multi-strategy parallel
+  searching (Exact -> Trie -> N-gram -> Fuzzy).
+- **Industrial Storage**: Unified binary format (`RIDX`) with SHA256 checksums and zlib compression.
+- **Modern Architecture**: Refactored into specialized modules (`base`, `builder`, `engine`, `storage`, `utils`).
+
+## Features
+
+- **Blazing Fast**: Uses Bitmap indices and Trie structures for O(m) prefix matching.
+- **Smart Detection**: Automatically detects search types (Name, Pinyin, Short Pinyin, Combo Pinyin, Path).
+- **Scoring System**: Sophisticated scoring based on match position, level rank, and path context.
+- **Fuzzy Fallback**: Integrated Levenshtein-based matching for handling typos.
+
+## Installation
 
 ```bash
-pip install https://github.com/harmonsir/cn-address-normalizer/releases/download/latest/cn_address_normalizer-0.0.1-py3-none-any.whl
+pip install .
+```
+
+## Quick Start
+
+```python
+from address_standardizer import load_standardizer
+
+
+# Automatically discovers built-in indices
+standardizer = load_standardizer("cn")
+
+# Complex pinyin combo search
+results = standardizer.search("gdfs", limit=3)
+for res in results:
+    print(f"{res.region.name} - Score: {res.score:.2f} - Path: {res.full_info['display_path']}")
 ```
 
 ## Usage
 
+### Auto-detection Search
 ```python
-from address_standardizer import AddressNormalizer
+# Search by Chinese Name
+standardizer.search("广东佛山")
 
-normalizer = AddressNormalizer()
-normalizer.load("address_standardizer.bin")
-print(normalizer.normalize("china"))
+# Search by Pinyin
+standardizer.search("guangdong")
+
+# Search by Short Pinyin
+standardizer.search("gd")
+
+# Search by Hierarchy Path
+standardizer.search("广东省>佛山市")
 ```
 
-More examples:
-
+### Building Your Own Index
 ```python
-from address_standardizer import AddressNormalizer
+import json
+from address_standardizer import RegionIndexBuilder
 
-normalizer = AddressNormalizer()
-normalizer.load("address_standardizer.bin")
 
-queries = [
-    "GD",
-    "guangdong",
-    "广东",
-    "深圳",
-    "SZ",
-    "china",
-    "YUG",
-]
+# Load your custom JSON data
+with open("data.json", "r", encoding="utf-8") as f:
+    regions = json.load(f)
 
-for q in queries:
-    print(q, "=>", normalizer.normalize(q))
+# Build and save
+builder = RegionIndexBuilder(regions)
+builder.build_all_indices()
+builder.save_to_file("custom_index.bin")
 ```
 
-```python
-from address_standardizer import AddressNormalizer
+## Technical Architecture
 
-normalizer = AddressNormalizer()
-normalizer.load("address_standardizer.bin")
+- **`builder.py`**: Pipeline for constructing multi-level indices (Inverted, Trie, N-gram, Bitmap).
+- **`engine.py`**: Core `RegionSearchEngine` implementing the search type detection flowchart and scoring.
+- **`storage.py`**: Secure binary I/O with checksum verification and compression.
+- **`utils.py`**: Optimized data structures like `BitmapIndex` for high-concurrency set operations.
 
-print(normalizer.normalize("广东 深圳"))
-print(normalizer.normalize("北京"))
-```
+## Roadmap
 
-## Build Dataset
-
-`build_dataset.py` is the training/build script for `address_standardizer.bin`. It reads:
-
-- `administrative_divisions_v2.json`
-- `iso3166-1.json`
-- `iso3166-3.json`
-- [`worldcities.csv`](https://simplemaps.com/data/world-cities)
-
-The script uses `pypinyin` to generate pinyin variants and then saves the index file. Adjust the paths as needed.
-
-```bash
-pip install pypinyin
-python build_dataset.py
-```
-
-## Files
-
-- `address_standardizer.py`
-- `address_standardizer.bin`
+- [x] Pinyin Combo support
+- [x] Administrative Division v2 support (CN)
+- [ ] Global multi-region support
+- [ ] GPS/Coordinate integration
+- [ ] High-concurrency C++ extension for core matching
 
 ---
 
-# cn-address-normalizer
+# 地址标准化工具 (v1.0.0)
 
-基于预构建索引的中国地址标准化工具。
+高性能、工业级的中国行政区划搜索与标准化库。
 
-## 安装（先使用whl安装）
+## 特性
 
-```bash
-pip install https://github.com/harmonsir/cn-address-normalizer/releases/download/latest/cn_address_normalizer-0.0.1-py3-none-any.whl
-```
-
-## 用法
-
-```python
-from address_standardizer import AddressNormalizer
-
-normalizer = AddressNormalizer()
-normalizer.load("address_standardizer.bin")
-print(normalizer.normalize("china"))
-```
-
-更多示例：
-
-```python
-from address_standardizer import AddressNormalizer
-
-normalizer = AddressNormalizer()
-normalizer.load("address_standardizer.bin")
-
-queries = [
-    "GD",
-    "guangdong",
-    "广东",
-    "深圳",
-    "SZ",
-    "china",
-    "YUG",
-]
-
-for q in queries:
-    print(q, "=>", normalizer.normalize(q))
-```
-
-```python
-from address_standardizer import AddressNormalizer
-
-normalizer = AddressNormalizer()
-normalizer.load("address_standardizer.bin")
-
-print(normalizer.normalize("广东 深圳"))
-print(normalizer.normalize("北京"))
-```
-
-## 训练集构建
-
-`build_dataset.py` 是 `address_standardizer.bin` 的训练/构建脚本，会读取：
-
-- `administrative_divisions_v2.json`
-- `iso3166-1.json`
-- `iso3166-3.json`
-- `worldcities.csv`
-
-脚本使用 `pypinyin` 生成拼音变体并保存索引文件，需要按实际路径调整。
-
-```bash
-pip install pypinyin
-python build_dataset.py
-```
-
-## 文件
-
-- `address_standardizer.py`
-- `address_standardizer.bin`
+- **智能识别**: 自动检测输入类型（中文、全拼、首字母、组合拼音、路径）。
+- **极速检索**: 基于位图索引 (Bitmap) 和前缀树 (Trie) 实现微秒级响应。
+- **组合拼音**: 支持 `gdfs` (广东佛山) 等极其简便的拼音组合搜索。
+- **多维度评分**: 结合匹配位置、行政层级权重和路径完整度进行综合排序。
